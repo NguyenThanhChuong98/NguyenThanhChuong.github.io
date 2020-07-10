@@ -5,7 +5,7 @@ class Classes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     class_name = db.Column(db.String(64), index=True, unique=True)
     location = db.Column(db.String(64), index=True)
-    students = db.relationship('Students', backref='author', lazy='dynamic')
+    students = db.relationship('Students', backref='classes', lazy='dynamic')
 
     def to_dict(self):
     	return dict(

@@ -14,7 +14,7 @@ def get_all_classes():
         dt.append(dict(
             id=cl.id,
             class_name=cl.class_name,
-            location=cl.location
+            location=cl.location,
         ))
     return jsonify(dt)
 
@@ -64,11 +64,16 @@ def delete_student_by_name(student_name):
         return{"Message": "Student " + student_name + " does not exist"}
 
 
-@app.route('/insert/class/student', methods=["POST"])
-def insert_student():
+@app.route('/insert/<id>/student', methods=["POST"])
+def insert_student(id):
     req = request.get_json()
     new_student = Students(student_name=req.get("student name"), age=req.get(
-        "age"), height=req.get("height"), class_id=req.get("class id"))
-    db.session.add(new_student)
-    db.session.commit()
-    return {"Message": "Create student " + req.get("student name") + " sucessfully"}
+        "age"), height=req.get("height"), id=req.get("class id"))
+    find_id_of_class = Classes.query.filter_by(id=id).first()
+    if find_id_of_class == True:
+        db.session.add(new_student)
+        db.session.commit()
+        return {"Message": "Create student " + req.get("student name") + " in class " +
+                req.get("class id") + " sucessfully"}
+    else:
+        return {"Message": "Class not exist"}
