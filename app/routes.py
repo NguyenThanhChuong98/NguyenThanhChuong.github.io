@@ -19,29 +19,33 @@ def get_all_classes():
     return jsonify(dt)
 
 
-@app.route('/class', methods=["POST"])
+@app.route('/insert/class', methods=["POST"])
 def insert_new_class():
     req = request.get_json()
     new_class = Classes(class_name=req.get("class name"), location=req.get("location"))
     db.session.add(new_class)
     db.session.commit()
-    return {"Message": "Create class " + req.get("class name") + " Sucessfully"}
+    return {"Message": "Create class " + req.get("class name") + " sucessfully"}
 
 
 @app.route('/search/class/<class_name>', methods=["GET"])
 def search_class_by_name(class_name):
-    name_of_class = Classes.query.filter_by(class_name=class_name).first_or_404(
-        description='There is no data with {}'.format(class_name))
-    return {"Message": "Class " + class_name + " Founded"}
+    name_of_class = Classes.query.filter_by(class_name=class_name)
+    if name_of_class == True:
+        return {"Message": "Class" + class_name + " founded"}
+    else:
+        return {"Message": "Class " + class_name + " does not exist"}
 
 
 @app.route('/delete/class/<class_name>', methods=["DELETE"])
 def delete_class_by_name(class_name):
-    name_of_class = Classes.query.filter_by(class_name=class_name).first_or_404(
-        description='There is no data with {}'.format(class_name))
-    db.session.delete(name_of_class)
-    db.session.commit()
-    return {"Message": "Class " + class_name + " Deleted Sucessfully"}
+    name_of_class = Classes.query.filter_by(class_name=class_name).first()
+    if name_of_class == True:
+        db.session.delete(name_of_class)
+        db.session.commit()
+        return {"Message": "Class " + class_name + " deleted sucessfully"}
+    else:
+        return{"Message": "Class " + class_name + " does not exist"}
 
 
 @app.route('/class/<class_name>/<student_name>', methods=["GET"])
@@ -49,11 +53,22 @@ def search_student_by_class_name(class_name, student_name):
     return "OK"
 
 
+@app.route('/delete/student/<student_name>', methods=["DELETE"])
+def delete_student_by_name(student_name):
+    name_of_student = Students.query.filter_by(student_name=student_name).first()
+    if name_of_student == True:
+        db.session.delete(name_of_student)
+        db.session.commit()
+        return {"Message": "Student " + student_name + " deleted sucessfully"}
+    else:
+        return{"Message": "Student " + student_name + " does not exist"}
+
+
 @app.route('/insert/class/student', methods=["POST"])
 def insert_student():
     req = request.get_json()
-    new_student = Student(student_name=req("student name"), age=req.get(
-        "age"), height=req.get("height"), class_id=req.get("class_id"))
+    new_student = Students(student_name=req.get("student name"), age=req.get(
+        "age"), height=req.get("height"), class_id=req.get("class id"))
     db.session.add(new_student)
     db.session.commit()
-    return {"Message": "Create student " + req.get("student name") + " Sucessfully"}
+    return {"Message": "Create student " + req.get("student name") + " sucessfully"}
