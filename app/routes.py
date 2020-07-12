@@ -63,8 +63,8 @@ def delete_student_by_id(id):
 def insert_student(id):
     req = request.get_json()
     new_student = Students(student_name=req.get("student name"), age=req.get(
-        "age"), height=req.get("height"), class_id=req.get("class id"))
-    find_id_of_class = session.query(Classes).filter_by(id=id).all()
+        "age"), height=req.get("height"))
+    find_id_of_class = Classes.query.filter(Classes.id==id).all()
     if find_id_of_class == True:
         db.session.add(new_student)
         db.session.commit()
