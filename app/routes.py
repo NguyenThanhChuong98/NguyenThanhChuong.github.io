@@ -48,28 +48,23 @@ def delete_class_by_name(class_name):
         return{"Message": "Class " + class_name + " does not exist"}
 
 
-@app.route('/class/<class_name>/<student_name>', methods=["GET"])
-def search_student_by_class_name(class_name, student_name):
-    return "OK"
-
-
-@app.route('/delete/student/<student_name>', methods=["DELETE"])
-def delete_student_by_name(student_name):
-    name_of_student = Students.query.filter_by(student_name=student_name).first()
-    if name_of_student == True:
-        db.session.delete(name_of_student)
+@app.route('/class/student/<id>', methods=["DELETE"])
+def delete_student_by_id(id):
+    student_id = Students.query.filter_by(id=id).first()
+    if student_id == True:
+        db.session.delete(student_id)
         db.session.commit()
-        return {"Message": "Student " + student_name + " deleted sucessfully"}
+        return {"Message": "Student " + student_id + " deleted sucessfully"}
     else:
-        return{"Message": "Student " + student_name + " does not exist"}
+        return{"Message": "Student " + student_id + " does not exist"}
 
 
 @app.route('/insert/<id>/student', methods=["POST"])
 def insert_student(id):
     req = request.get_json()
     new_student = Students(student_name=req.get("student name"), age=req.get(
-        "age"), height=req.get("height"), id=req.get("class id"))
-    find_id_of_class = Classes.query.filter_by(id=id).first()
+        "age"), height=req.get("height"), class_id=req.get("class id"))
+    find_id_of_class = session.query(Classes).filter_by(id=id).all()
     if find_id_of_class == True:
         db.session.add(new_student)
         db.session.commit()
@@ -77,3 +72,8 @@ def insert_student(id):
                 req.get("class id") + " sucessfully"}
     else:
         return {"Message": "Class not exist"}
+
+
+@app.route('/class/<class_name>/<student_name>', methods=["GET"])
+def search_student_by_class_name(class_name, student_name):
+    return "OK"
