@@ -17,7 +17,9 @@ class Classes(db.Model):
 
 class Students(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    student_name = db.Column(db.String(64), index=True, unique=True)
+    student_name = db.Column(db.String(64), index=True)
     age = db.Column(db.Integer)
     height = db.Column(db.Integer)
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id'))
+
+
