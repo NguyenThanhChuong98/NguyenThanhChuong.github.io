@@ -8,11 +8,11 @@ class Classes(db.Model):
     students = db.relationship('Students', backref='classes', lazy='dynamic')
 
     def to_dict(self):
-    	return dict(
-				id = self.id,
-    class_name = self.class_name,
-    location = self.location
-    		)
+        return dict(
+            id=self.id,
+            class_name=self.class_name,
+            location=self.location
+        )
 
 
 class Students(db.Model):
@@ -22,4 +22,11 @@ class Students(db.Model):
     height = db.Column(db.Integer)
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id'))
 
-
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            student_name=self.student_name,
+            age=self.age,
+            height=self.height,
+            class_id=self.class_id
+        )
