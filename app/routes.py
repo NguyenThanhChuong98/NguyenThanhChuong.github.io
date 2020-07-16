@@ -3,6 +3,8 @@ from app import db
 from app.models import Classes, Students
 from flask import make_response, jsonify
 from flask import request
+from sqlalchemy import desc, asc
+from sqlalchemy.sql import select
 import json
 
 
@@ -60,7 +62,7 @@ def delete_class_by_name(class_name):
 def insert_student(id):
     req = request.get_json()
     new_student = Students(student_name=req.get("student name"), age=req.get(
-        "age"), height=req.get("height"))
+        "age"), height=req.get("height"), class_id=id)
     find_id_of_class = Classes.query.filter(Classes.id == id).first()
     print(find_id_of_class)
     if find_id_of_class:
@@ -96,29 +98,44 @@ def delete_student_by_class_id(class_id, student_id):
         return{"Message": "Student " + student_id + " does not exist"}
 
 
-@app.route('/<class_id>/students', methods=["GET"])
-def get_all_students_by_class_id(class_id):
-    query1 = Classes.query.fitler(Classes.id == class_id).first()
+@app.route('/<class_id>/students/<int:number>', methods=["GET"])
+def get_all_students_by_class_id(class_id, number):
+    query1 = Students.query.filter(Students.class_id == class_id).all()
+    print(query1)
     dt = []
-    if query1:
-        query2 = Students.query.order_by(Students.height).all()
-        for cl in students:
+    if query1 and number == 1:
+        incre = Students.query.filter(Students.class_id == class_id).order_by(Students.height.asc()).all()
+        print(incre)
+        for cl in incre:
             dt.append(dict(
                 id=cl.id,
                 student_name=cl.student_name,
                 age=cl.age,
                 height=cl.height,
                 class_id=cl.class_id
-                ))
+            ))
+        return jsonify(dt)
+    elif query1 and number == 2:
+        des = Students.query.filter(Students.class_id == class_id).order_by(Students.height.desc()).all()
+        print(des)
+        for cl in des:
+            dt.append(dict(
+                id=cl.id,
+                student_name=cl.student_name,
+                age=cl.age,
+                height=cl.height,
+                class_id=cl.class_id
+            ))
         return jsonify(dt)
     else:
+        return {"Message": "Class do not have students or not exist"}
 
-    return "OK"
 
-for cl in classes:
-        dt.append(dict(
-            id=cl.id,
-            class_name=cl.class_name,
-            location=cl.location,
-        ))
-    return jsonify(dt)
+@app.route("/students/update/<student_id>", methods=["PUT"])
+def update_student_by_id(student_id):
+    req = request.get_json()
+    check_id_student = Students.query.filter(Students.id == student_id).first()
+    replace_student = Students(student_name=req.get("student name"), age=req.get(
+        "age"), height=req.get("height"), class_id=req.get("class_id"))
+    if check_id_student:
+
