@@ -3,8 +3,9 @@ from app import db
 from app.models import Classes, Students
 from flask import make_response, jsonify
 from flask import request
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, func
 from sqlalchemy.sql import select, update
+
 import json
 
 
@@ -58,22 +59,25 @@ def delete_class_by_name(class_name):
         return{"Message": "Class " + class_name + " does not exist"}
 
 
-@app.route('/student/insert/<id>', methods=["POST"])
+@app.route('/student/insert_student/<id>', methods=["POST"])
 def insert_student(id):
     req = request.get_json()
-    new_student = Students(student_name=req.get("student name"), age=req.get(
-        "age"), height=req.get("height"), class_id=id)
     find_id_of_class = Classes.query.filter(Classes.id == id).first()
     print(find_id_of_class)
     if find_id_of_class:
-        db.session.add(new_student)
-        db.session.commit()
-        return {"Message": "Create student " + req.get("student name") + " sucessfully"}
-    else:
-        return {"Message": "Class not exist"}
+        count_student = Students.query.filter(Students.class_id == id).count()
+        print(count_student)
+        if 0 < count_student < 40:
+            new_student = Students(student_name=req.get("student name"), age=req.get(
+                "age"), height=req.get("height"), class_id=id)
+            db.session.add(new_student)
+            db.session.commit()
+            return {"Message": "Create student " + req.get("student name") + " sucessfully"}
+        else:
+            return {"Message": "Class not exist or have more than 40 students"}
 
 
-@app.route('/student/search/<class_id>/<student_name>', methods=["GET"])
+@app.route('/student/search_student_by_class_name/<class_id>/<student_name>', methods=["GET"])
 def search_student_by_class_name(class_id, student_name):
     get_student_class_id_and_name = Students.query.filter(
         Classes.id == class_id,
@@ -85,7 +89,7 @@ def search_student_by_class_name(class_id, student_name):
         return {"Message": "Student " + student_name + " Not Founded"}
 
 
-@app.route('/student/delete/<class_id>/<student_id>', methods=["DELETE"])
+@app.route('/student/delete_student_by_class_id/<class_id>/<student_id>', methods=["DELETE"])
 def delete_student_by_class_id(class_id, student_id):
     get_class_id_and_student_id = Students.query.filter(
         Classes.id == class_id, Students.id == student_id).first()
@@ -98,7 +102,7 @@ def delete_student_by_class_id(class_id, student_id):
         return{"Message": "Student " + student_id + " does not exist"}
 
 
-@app.route('/students/<class_id>/<int:number>', methods=["GET"])
+@app.route('/students/get_all_students_by_class_id/<class_id>/<int:number>', methods=["GET"])
 def get_all_students_by_class_id(class_id, number):
     query1 = Students.query.filter(Students.class_id == class_id).all()
     print(query1)
@@ -131,13 +135,13 @@ def get_all_students_by_class_id(class_id, number):
         return {"Message": "Class do not have students or not exist"}
 
 
-@app.route("/student/update/<student_id>", methods=["PUT"])
+@app.route("/student/update_student_by_id/<student_id>", methods=["PUT"])
 def update_student_by_id(student_id):
     req = request.get_json()
     check_id_student = Students.query.filter(Students.id == student_id).first()
     print(check_id_student)
     if check_id_student:
-        update_student = Students.query.filter_by(id = student_id).update(
+        update_student = Students.query.filter_by(id=student_id).update(
             dict(student_name=req.get("student name"), age=req.get(
                 "age"), height=req.get("height"), class_id=req.get("class_id")))
         print(update_student)
