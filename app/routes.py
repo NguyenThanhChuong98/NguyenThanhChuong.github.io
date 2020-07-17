@@ -4,7 +4,7 @@ from app.models import Classes, Students
 from flask import make_response, jsonify
 from flask import request
 from sqlalchemy import desc, asc
-from sqlalchemy.sql import select
+from sqlalchemy.sql import select, update
 import json
 
 
@@ -98,7 +98,7 @@ def delete_student_by_class_id(class_id, student_id):
         return{"Message": "Student " + student_id + " does not exist"}
 
 
-@app.route('/<class_id>/students/<int:number>', methods=["GET"])
+@app.route('/students/<class_id>/<int:number>', methods=["GET"])
 def get_all_students_by_class_id(class_id, number):
     query1 = Students.query.filter(Students.class_id == class_id).all()
     print(query1)
@@ -131,11 +131,17 @@ def get_all_students_by_class_id(class_id, number):
         return {"Message": "Class do not have students or not exist"}
 
 
-@app.route("/students/update/<student_id>", methods=["PUT"])
+@app.route("/student/update/<student_id>", methods=["PUT"])
 def update_student_by_id(student_id):
     req = request.get_json()
     check_id_student = Students.query.filter(Students.id == student_id).first()
-    replace_student = Students(student_name=req.get("student name"), age=req.get(
-        "age"), height=req.get("height"), class_id=req.get("class_id"))
+    print(check_id_student)
     if check_id_student:
-
+        update_student = Students.query.filter_by(id = student_id).update(
+            dict(student_name=req.get("student name"), age=req.get(
+                "age"), height=req.get("height"), class_id=req.get("class_id")))
+        print(update_student)
+        db.session.commit()
+        return {"Message": "Update student successfully"}
+    else:
+        return {"Message": "Student not found"}
